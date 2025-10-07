@@ -52,7 +52,14 @@ export const translations = {
     weight: "Weight (kg)",
     hemoglobin: "Hemoglobin (g/dL)",
     notes: "Notes",
-    viewAll: "View All"
+    viewAll: "View All",
+    editPatient: "Edit Patient",
+    editANCVisit: "Edit ANC Visit",
+    editVaccination: "Edit Vaccination",
+    completedDate: "Completed Date",
+    vaccinationName: "Vaccination Name",
+    dueForChild: "Due for Child",
+    contactNumber: "Contact Number"
   },
   hi: {
     appName: "मातृ देखभाल",
@@ -107,7 +114,14 @@ export const translations = {
     weight: "वजन (किलो)",
     hemoglobin: "हीमोग्लोबिन (g/dL)",
     notes: "टिप्पणियाँ",
-    viewAll: "सभी देखें"
+    viewAll: "सभी देखें",
+    editPatient: "रोगी संपादित करें",
+    editANCVisit: "ANC विज़िट संपादित करें",
+    editVaccination: "टीकाकरण संपादित करें",
+    completedDate: "पूर्ण तिथि",
+    vaccinationName: "टीकाकरण का नाम",
+    dueForChild: "बच्चे के लिए देय",
+    contactNumber: "संपर्क नंबर"
   },
   bn: {
     appName: "মাতৃ যত্ন",
@@ -162,7 +176,14 @@ export const translations = {
     weight: "ওজন (কেজি)",
     hemoglobin: "হিমোগ্লোবিন (g/dL)",
     notes: "নোট",
-    viewAll: "সব দেখুন"
+    viewAll: "সব দেখুন",
+    editPatient: "রোগী সম্পাদনা করুন",
+    editANCVisit: "ANC ভিজিট সম্পাদনা করুন",
+    editVaccination: "টিকাকরণ সম্পাদনা করুন",
+    completedDate: "সম্পন্ন তারিখ",
+    vaccinationName: "টিকাকরণের নাম",
+    dueForChild: "শিশুর জন্য প্রাপ্য",
+    contactNumber: "যোগাযোগ নম্বর"
   }
 };
 

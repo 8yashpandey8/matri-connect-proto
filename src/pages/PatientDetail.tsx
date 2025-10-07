@@ -1,19 +1,57 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Phone, MapPin, Calendar, Activity, Syringe, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { ArrowLeft, User, Phone, MapPin, Calendar, Activity, Syringe, CheckCircle, Clock, AlertCircle, Edit } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { EditPatientDialog } from '@/components/EditPatientDialog';
+import { EditANCVisitDialog } from '@/components/EditANCVisitDialog';
+import { EditVaccinationDialog } from '@/components/EditVaccinationDialog';
+import { ANCVisit, Vaccination } from '@/types';
 
 const PatientDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { patients } = useApp();
+  const { patients, updatePatient } = useApp();
   const { t } = useTranslation();
+  
+  const [editPatientOpen, setEditPatientOpen] = useState(false);
+  const [editVisitOpen, setEditVisitOpen] = useState(false);
+  const [editVaccinationOpen, setEditVaccinationOpen] = useState(false);
+  const [selectedVisit, setSelectedVisit] = useState<ANCVisit | null>(null);
+  const [selectedVaccination, setSelectedVaccination] = useState<Vaccination | null>(null);
 
   const patient = patients.find(p => p.id === id);
+
+  const handleEditVisit = (visit: ANCVisit) => {
+    setSelectedVisit(visit);
+    setEditVisitOpen(true);
+  };
+
+  const handleEditVaccination = (vaccination: Vaccination) => {
+    setSelectedVaccination(vaccination);
+    setEditVaccinationOpen(true);
+  };
+
+  const handleSaveVisit = (updates: Partial<ANCVisit>) => {
+    if (patient && selectedVisit) {
+      const updatedVisits = patient.ancVisits.map(v =>
+        v.id === selectedVisit.id ? { ...v, ...updates } : v
+      );
+      updatePatient(patient.id, { ancVisits: updatedVisits });
+    }
+  };
+
+  const handleSaveVaccination = (updates: Partial<Vaccination>) => {
+    if (patient && selectedVaccination) {
+      const updatedVaccinations = patient.vaccinations.map(v =>
+        v.id === selectedVaccination.id ? { ...v, ...updates } : v
+      );
+      updatePatient(patient.id, { vaccinations: updatedVaccinations });
+    }
+  };
 
   if (!patient) {
     return (
@@ -64,10 +102,11 @@ const PatientDetail: React.FC = () => {
 
       {/* Patient Info Card */}
       <Card className="p-6">
-        <div className="flex items-start gap-6 mb-6">
-          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
-            <User className="w-10 h-10 text-primary" />
-          </div>
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-start gap-6">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
+              <User className="w-10 h-10 text-primary" />
+            </div>
           <div className="flex-1 space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -115,14 +154,20 @@ const PatientDetail: React.FC = () => {
               </div>
             )}
           </div>
+          </div>
+          <Button variant="outline" size="icon" onClick={() => setEditPatientOpen(true)}>
+            <Edit className="w-4 h-4" />
+          </Button>
         </div>
       </Card>
 
       {/* ANC Visits */}
       <Card className="p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Activity className="w-5 h-5 text-primary" />
-          <h2 className="text-xl font-semibold text-foreground">{t('ancVisits')}</h2>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Activity className="w-5 h-5 text-primary" />
+            <h2 className="text-xl font-semibold text-foreground">{t('ancVisits')}</h2>
+          </div>
         </div>
 
         {patient.ancVisits.length === 0 ? (
@@ -134,8 +179,8 @@ const PatientDetail: React.FC = () => {
                 key={visit.id}
                 className="p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3 flex-1">
                     {getStatusIcon(visit.status)}
                     <div>
                       <p className="font-semibold text-foreground">
@@ -147,7 +192,12 @@ const PatientDetail: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  {getStatusBadge(visit.status)}
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(visit.status)}
+                    <Button variant="outline" size="icon" onClick={() => handleEditVisit(visit)}>
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
 
                 {visit.status === 'completed' && (
@@ -187,9 +237,11 @@ const PatientDetail: React.FC = () => {
 
       {/* Vaccinations */}
       <Card className="p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Syringe className="w-5 h-5 text-secondary" />
-          <h2 className="text-xl font-semibold text-foreground">{t('vaccinations')}</h2>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Syringe className="w-5 h-5 text-secondary" />
+            <h2 className="text-xl font-semibold text-foreground">{t('vaccinations')}</h2>
+          </div>
         </div>
 
         {patient.vaccinations.length === 0 ? (
@@ -201,7 +253,7 @@ const PatientDetail: React.FC = () => {
                 key={vac.id}
                 className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-1">
                   {getStatusIcon(vac.status)}
                   <div>
                     <p className="font-semibold text-foreground">{vac.name}</p>
@@ -216,12 +268,45 @@ const PatientDetail: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                {getStatusBadge(vac.status)}
+                <div className="flex items-center gap-2">
+                  {getStatusBadge(vac.status)}
+                  <Button variant="outline" size="icon" onClick={() => handleEditVaccination(vac)}>
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
         )}
       </Card>
+
+      {/* Edit Dialogs */}
+      {patient && (
+        <>
+          <EditPatientDialog
+            patient={patient}
+            open={editPatientOpen}
+            onOpenChange={setEditPatientOpen}
+            onSave={(updates) => updatePatient(patient.id, updates)}
+          />
+          {selectedVisit && (
+            <EditANCVisitDialog
+              visit={selectedVisit}
+              open={editVisitOpen}
+              onOpenChange={setEditVisitOpen}
+              onSave={handleSaveVisit}
+            />
+          )}
+          {selectedVaccination && (
+            <EditVaccinationDialog
+              vaccination={selectedVaccination}
+              open={editVaccinationOpen}
+              onOpenChange={setEditVaccinationOpen}
+              onSave={handleSaveVaccination}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 };
